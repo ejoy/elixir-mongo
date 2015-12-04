@@ -173,10 +173,10 @@ defmodule Mongo.Server do
 
   # makes sure response is complete
   defp complete(_mongo, expected_length, buffer) when byte_size(buffer) == expected_length, do: buffer
-  defp complete(_mongo, expected_length, buffer) when byte_size(buffer) >  expected_length, do: binary_part(buffer, 0, expected_length)
   defp complete(mongo, expected_length, buffer) do
     case tcp_recv(mongo) do
       {:ok, mess} -> complete(mongo, expected_length, buffer <> mess)
+      {:error, msg} -> %Mongo.Error{msg: msg}
     end
   end
 
