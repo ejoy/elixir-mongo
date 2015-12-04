@@ -8,11 +8,11 @@ defmodule Mongo.Request do
     payload: nil]
 
 
-  @update      <<0xd1, 0x07, 0, 0>> # 2001  update document
-  @insert      <<0xd2, 0x07, 0, 0>> # 2002  insert new document
-  @get_more    <<0xd5, 0x07, 0, 0>> # 2005  Get more data from a query. See Cursors
-  @delete      <<0xd6, 0x07, 0, 0>> # 2006  Delete documents
-  @kill_cursor <<0xd7, 0x07, 0, 0>> # 2007  Tell database client is done with a cursor
+  @update      <<0xd1, 0x07, 0, 0, 0::32>>  # 2001  update document
+  @insert      <<0xd2, 0x07, 0, 0, 0::32>>  # 2002  insert new document
+  @get_more    <<0xd5, 0x07, 0, 0, 0::32>>  # 2005  Get more data from a query. See Cursors
+  @delete      <<0xd6, 0x07, 0, 0, 0::32>>  # 2006  Delete documents
+  @kill_cursor <<0xd7, 0x07, 0, 0, 0::32>>  # 2007  Tell database client is done with a cursor
 
   @query       <<0xd4, 0x07, 0, 0>> # 2004  query a collection
   @query_opts  <<0b00000100::8>>    # default query options, equvalent to `cursor.set_opts(slaveok: true)`
@@ -26,43 +26,46 @@ defmodule Mongo.Request do
   """
   def query(find) do
     selector = if find.mods == %{}, do: find.selector, else: Map.put(find.mods, :'$query', find.selector)
-    @query <> (Enum.reduce(find.opts, @query_opts, &queryopt_red/2)) <> <<0::24>> <>
-      find.collection.db.name <> "." <>  find.collection.name <> <<0::8>> <>
-      <<find.skip::32-little-signed>> <>
-      <<find.batchSize::32-little-signed>> <>
-      Bson.encode(selector) <>
+    [
+      @query, (Enum.reduce(find.opts, @query_opts, &queryopt_red/2)),  <<0::24>>, 
+      find.collection.db.name, 46, find.collection.name, 
+      <<0, find.skip::32-little-signed, find.batchSize::32-little-signed>>,
+      Bson.encode(selector),
       Bson.encode(find.projector)
+    ]
   end
 
   @doc """
     Builds a database command message composed of the command tag and its arguments.
   """
   def cmd(dbname, cmd, cmd_args \\ %{}) do
-    @query <> @query_opts <> <<0::24>> <> # [slaveok: true]
-    dbname <> ".$cmd" <>
-    <<0::40, 255, 255, 255, 255>> <> # skip(0), batchSize(-1)
-    document(cmd, cmd_args)
+    [
+      @query, @query_opts, <<0::24>>,  # [slaveok: true]
+      dbname, <<".$cmd", 0, 0::32, 255, 255, 255, 255>>, # skip(0), batchSize(-1)
+      document(cmd, cmd_args)
+    ]
   end
 
   @doc """
     Builds an insert command message
   """
   def insert(collection, docs) do
-    docs |> Enum.reduce(
-      @insert <> <<0::32>> <>
-      collection.db.name <> "." <>  collection.name <> <<0::8>>,
-      fn(doc, acc) -> acc <> Bson.encode(doc) end)
+    [
+      @insert, collection.db.name,  46, collection.name, <<0::8>>,
+      Enum.map(docs, fn(doc) -> Bson.encode(doc) end)
+    ]
   end
 
   @doc """
     Builds an update command message
   """
   def update(collection, selector, update, upsert, multi) do
-      @update <> <<0::32>> <>
-      collection.db.name <> "." <>  collection.name <> <<0::8>> <>
-      <<0::6, (bit(multi))::1, (bit(upsert))::1, 0::24>> <>
-      (document(selector) ) <>
-      (document(update))
+    [
+      @update, 
+      collection.db.name,  46,  collection.name,
+      <<0::8, 0::6, (bit(multi))::1, (bit(upsert))::1, 0::24>>,
+      document(selector), document(update)
+    ]
   end
   # transforms `true` and `false` to bits
   defp bit(false), do: 0
@@ -72,34 +75,40 @@ defmodule Mongo.Request do
     Builds a delete command message
   """
   def delete(collection, selector, justOne) do
-      @delete <> <<0::32>> <>
-      collection.db.name <> "." <>  collection.name <> <<0::8>> <>
-      <<0::7, (bit(justOne))::1, 0::24>> <>
+    [
+      @delete,
+      collection.db.name, 46, collection.name, 
+      <<0, 0::7, (bit(justOne))::1, 0::24>>,
       document(selector)
+    ]
   end
 
   @doc """
     Builds a kill_cursor command message
   """
   def kill_cursor(cursorid) do
-      @kill_cursor <> <<0::32>> <>
-      <<1::32-little-signed>> <>
-      <<cursorid::64-little-signed>>
+      [
+        @kill_cursor, 
+        <<1::32-little-signed, cursorid::64-little-signed>>
+      ]
   end
 
   @doc """
     Builds a get_more command message
   """
   def get_more(collection, batchsize, cursorid) do
-      @get_more <> <<0::32>> <>
-      collection.db.name <> "." <>  collection.name <> <<0::8>> <>
-      <<batchsize::32-little-signed>> <>
-      <<cursorid::64-little-signed>>
+    [
+      @get_more,
+      collection.db.name, 46,  collection.name,
+      <<0, batchsize::32-little-signed, cursorid::64-little-signed>>,
+    ]
   end
 
   # transform a document into bson
   defp document(command), do: Bson.encode(command)
-  defp document(command, command_args), do: Bson.Encoder.document(Enum.to_list(command) ++ Enum.to_list(command_args))
+  defp document(command, command_args) do
+    Bson.encode(Enum.to_list(command) ++ Enum.to_list(command_args))
+  end
 
   use Bitwise
   # Operates one option

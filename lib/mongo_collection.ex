@@ -305,7 +305,7 @@ defmodule Mongo.Collection do
   Gets a list of All Indexes
   """
   def getIndexes(collection) do
-    system_indexes = new(collection.db, "system.indexes")
+    new(collection.db, "system.indexes")
     |> find(%{ns: collection.db.name <> "." <> collection.name}) 
     |> Enum.to_list
   end

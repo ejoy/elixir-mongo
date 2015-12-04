@@ -50,7 +50,7 @@ defmodule Mongo.Cursor do
     """
     def reduce(cursor, acc, reducer)
     def reduce(cursor, {:cont, acc}, reducer) do
-      case reducer.(cursor.response, acc) do
+      case reducer.(cursor.response.docs, acc) do
         {:cont, acc} ->
           if cursor.exhausted do
             {:done, acc}

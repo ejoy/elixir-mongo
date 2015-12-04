@@ -84,8 +84,8 @@ defmodule Mongo.Find do
       case Mongo.Find.exec(find) do
         %Mongo.Cursor{}=cursor ->
           case Enumerable.reduce(cursor, {:cont, acc},
-            fn(response, acc)->
-              case Enumerable.reduce(response, acc, reducer) do
+            fn(docs, acc)->
+              case Enumerable.reduce(docs, acc, reducer) do
                 {:done, acc} -> {:cont, {:cont, acc}}
                 {:halted, acc} -> {:halt, acc}
                 {:suspended, acc} -> {:suspend, acc}

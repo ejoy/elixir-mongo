@@ -24,7 +24,7 @@ defmodule Mongo.Cursor.Test do
   end
 
   test "batchArray", ctx do
-    assert ctx[:anycoll] |> Mongo.Collection.find |> Map.put(:batchSize, 2) |> Mongo.Find.exec |> Enum.to_list |> Enum.count == 3
+    assert ctx[:anycoll] |> Mongo.Collection.find |> Map.put(:batchSize, 3) |> Mongo.Find.exec |> Enum.to_list |> Enum.count == 3
   end
 
   test "explain", ctx do

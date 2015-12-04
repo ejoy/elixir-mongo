@@ -4,8 +4,8 @@ defmodule Mongo.Mixfile do
   def project do
     [ app: :mongo,
       name: "mongo",
-      version: "0.5.1",
-      elixir: "~> 1.0.0",
+      version: "0.5.2",
+      elixir: "~> 1.1.0",
       source_url: "https://github.com/checkiz/elixir-mongo",
       description: "MongoDB driver for Elixir",
       deps: deps(Mix.env),
@@ -24,7 +24,7 @@ defmodule Mongo.Mixfile do
   # Returns the list of dependencies for prod
   defp deps(:prod) do
     [
-      bson: "~> 0.4.2"
+      {:cbson, github: "sean-lin/elixir-cbson"},
     ]
   end
 
