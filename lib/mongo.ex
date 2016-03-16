@@ -46,9 +46,9 @@ defmodule Mongo do
   defmodule Error, do: defstruct([msg: nil, acc: []])
 
   defmodule Bang do
-    defexception [:message, :stack]
+    defexception [:message, :stack, :raw]
     def exception(message) when is_bitstring(message), do: %Bang{message: message}
-    def exception(msg: msg, acc: acc), do: %Bang{message: inspect(msg), stack: acc}
+    def exception(msg: msg, acc: acc), do: %Bang{message: inspect(msg), stack: acc, raw: msg}
   end
 
 end
