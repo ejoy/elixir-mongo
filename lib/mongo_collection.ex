@@ -295,19 +295,33 @@ defmodule Mongo.Collection do
   Creates an index for the collection
   """
   def createIndex(collection, name, key, unique \\ false, options \\ %{}) do
-    system_indexes = new(collection.db, "system.indexes")
-    %{name: name, ns: collection.db.name <> "." <> collection.name, key: key, unique: unique} 
-    |> Map.merge(options)
-    |> insert_one(system_indexes)
+    indexes = %{
+      key: key,
+      name: name,
+      unique: unique,
+    } |> Map.merge(options)
+    createIndexes(collection, [indexes])
+  end
+
+  def createIndexes(collection, indexes) do
+    req = %{
+      "createIndexes": collection.name,
+      "indexes": indexes,
+    }
+    case Mongo.Db.cmd_sync(collection.db, req) do
+      {:ok, %{docs: [resp]}} -> resp
+      error -> error
+    end
   end
 
   @doc """
-  Gets a list of All Indexes
+  Gets a list of All Indexes, only work at 3.0
   """
   def getIndexes(collection) do
-    new(collection.db, "system.indexes")
-    |> find(%{ns: collection.db.name <> "." <> collection.name}) 
-    |> Enum.to_list
+    case Mongo.Db.cmd_sync(collection.db, %{"listIndexes": collection.name}) do
+      {:ok, %{docs: [resp]}} -> resp.cursor.firstBatch
+      error -> error
+    end
   end
 
   @doc """

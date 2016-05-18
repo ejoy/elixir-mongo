@@ -28,12 +28,13 @@ defmodule Mongo.Cursor.Test do
   end
 
   test "explain", ctx do
-    assert ctx[:anycoll] |> Mongo.Collection.find |> Mongo.Find.explain |> Map.has_key?(:cursor)
+    assert ctx[:anycoll] |> Mongo.Collection.find |> Mongo.Find.explain 
   end
 
   test "find hint", ctx do
     ctx[:anycoll] |> Mongo.Collection.createIndex("tst_value", %{value: true})
-    assert "BtreeCursor tst_value" == ctx[:anycoll] |> Mongo.Collection.find |> Mongo.Find.hint(%{value: true}) |> Mongo.Find.explain |> Map.get(:cursor)
+    explain = ctx[:anycoll] |> Mongo.Collection.find |> Mongo.Find.hint(%{value: true}) |> Mongo.Find.explain 
+    assert "tst_value" == explain["queryPlanner"]["winningPlan"]["inputStage"][:indexName]
   end
 
 end
