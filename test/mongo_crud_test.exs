@@ -28,6 +28,9 @@ defmodule Mongo.Crud.Test do
       assert anycoll |> Mongo.Collection.find |> Enum.to_list |> Enum.count == 6
       # retreive all but one doc then count
       assert anycoll |> Mongo.Collection.find |> Mongo.Find.skip(1) |> Enum.to_list |> Enum.count == 5
+      
+      # retreive one doc 
+      assert anycoll |> Mongo.Collection.find |> Mongo.Find.limit(1) |> Enum.to_list |> Enum.count == 1
     end
   end
 

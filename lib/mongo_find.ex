@@ -38,6 +38,13 @@ defmodule Mongo.Find do
   def skip(find, skip), do: %__MODULE__{find| skip: skip}
 
   @doc """
+  Limits the number of documents to the query.
+
+  Must be run before executing the query
+  """
+  def limit(find, limit) when is_integer(limit), do: %__MODULE__{find| batchSize: -limit}
+
+  @doc """
   Executes the query and returns a `%Mongo.Cursor{}`
   """
   def exec(find) do
