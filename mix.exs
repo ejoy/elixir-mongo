@@ -4,9 +4,9 @@ defmodule Mongo.Mixfile do
   def project do
     [ app: :mongo,
       name: "mongo",
-      version: "0.5.3",
+      version: "0.5.4",
       elixir: "~> 1.2.0",
-      source_url: "https://github.com/checkiz/elixir-mongo",
+      source_url: "https://github.com/ejoy/elixir-mongo",
       description: "MongoDB driver for Elixir",
       deps: deps(Mix.env),
       package: package,
@@ -48,7 +48,7 @@ defmodule Mongo.Mixfile do
     [ contributors: ["jerp"],
       licenses: ["MIT"],
       links: %{
-        "GitHub" => "https://github.com/checkiz/elixir-mongo",
+        "GitHub" => "https://github.com/ejoy/elixir-mongo",
         "Documentation" => "https://checkiz.github.io/elixir-mongo"
       } ]
   end

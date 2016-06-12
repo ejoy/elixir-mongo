@@ -44,5 +44,4 @@ db |> Mongo.getLastError
 
 ### Dependencies
 
-- MongoDB needs a Bson encoder/decoder, this project uses the elixir-bson encoder/decoder. See [elixir-bson source repo](https://github.com/checkiz/elixir-bson) and its
-[documentation](http://checkiz.github.io/elixir-bson)
+- MongoDB needs a Bson encoder/decoder, this project uses the elixir-bson encoder/decoder. See [elixir-cbson source repo](https://github.com/sean-lin/elixir-cbson) 
