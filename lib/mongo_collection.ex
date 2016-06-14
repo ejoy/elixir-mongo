@@ -39,6 +39,7 @@ defmodule Mongo.Collection do
   @doc """
   New collection
   """
+  def new(db, name) when is_atom(name), do: new(db, Atom.to_string(name))
   def new(db, name), do: %__MODULE__{db: db, name: name, opts: Db.coll_opts(db)}
 
   @doc """

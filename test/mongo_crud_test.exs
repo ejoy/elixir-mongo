@@ -89,4 +89,7 @@ defmodule Mongo.Crud.Test do
     end
   end
 
+  test "atom collection name", ctx do
+      assert ctx.db |> Mongo.Db.collection(:coll_crud) |> Mongo.Collection.find("obj.value == 0") |> Enum.count == 1
+  end
 end
