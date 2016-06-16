@@ -110,6 +110,17 @@ defmodule Mongo.Db do
   defbang getLastError(db)
 
   @doc """
+    drop the database 
+  """
+  def dropDatabase(db) do
+    case cmd_sync(db, %{dropDatabase: 1}) do
+      {:ok, resp} -> resp |> Mongo.Response.error
+      error -> error
+    end
+  end
+  defbang dropDatabase(db)
+
+  @doc """
   Returns the previous error status of the preceding operation(s).
   """
   def getPrevError(db) do
