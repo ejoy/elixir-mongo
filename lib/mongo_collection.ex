@@ -320,7 +320,8 @@ defmodule Mongo.Collection do
   """
   def getIndexes(collection) do
     case Mongo.Db.cmd_sync(collection.db, %{"listIndexes": collection.name}) do
-      {:ok, %{docs: [resp]}} -> resp.cursor.firstBatch
+      {:ok, %{docs: [%{ok: 1.0} = resp]}} -> resp.cursor.firstBatch
+      {:ok, %{docs: [error]}} -> error
       error -> error
     end
   end
