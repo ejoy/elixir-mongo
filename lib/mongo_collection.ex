@@ -34,7 +34,7 @@ defmodule Mongo.Collection do
     db: nil,
     opts: %{} ]
 
-  @def_reduce "function(k, vs){return Array.sum(vs)}"
+  @def_reduce "function(obj, prev){}"
 
   @doc """
   New collection
@@ -222,7 +222,11 @@ defmodule Mongo.Collection do
   def group(collection, key, reduce \\ @def_reduce, initial \\ %{}, params \\ %{})
   def group(collection, key, reduce, initial, params) do
     params = Map.take(params, [:'$keyf', :cond, :finalize])
-    if params[:keyf], do: params = Map.put_new(:'$keyf', params[:keyf])
+    params = if params[:keyf] do
+      Map.put(params, :'$keyf', params[:keyf])
+    else
+      params
+    end
     case Mongo.Db.cmd_sync(collection.db, %{group: Map.merge(params, %{ns: collection.name, key: key, '$reduce': reduce, initial: initial})}) do
       {:ok, resp} -> Mongo.Response.group resp
       error -> error

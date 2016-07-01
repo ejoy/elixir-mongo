@@ -1,4 +1,4 @@
-defmodule Mongo.Db.Test do
+defmodule Mongo.Db.Collection.Test do
   use ExUnit.Case, async: false
 
   test "drop database" do
@@ -13,7 +13,7 @@ defmodule Mongo.Db.Test do
     [%{a: 1, b: 2}]
     |> Mongo.Collection.insert(anycoll)
 
-    assert [idx] = Mongo.Collection.getIndexes(anycoll)
+    assert [_idx] = Mongo.Collection.getIndexes(anycoll)
   end
 end
 

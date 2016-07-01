@@ -14,10 +14,7 @@ defmodule Mongo.Helpers do
   When `count` returns `{:error, reason}`, `count!` raises an exception
   """
   defmacro defbang({ name, _, args }) do
-    unless args |> is_list do
-      args = []
-    end
-
+    args = if is_list(args), do: args, else: []
     {:__block__, [], quoted} =
     quote bind_quoted: [name: Macro.escape(name), args: Macro.escape(args)] do
       def unquote(to_string(name) <> "!" |> String.to_atom)(unquote_splicing(args)) do
