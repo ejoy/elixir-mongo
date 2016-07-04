@@ -1,7 +1,7 @@
 Code.require_file "test_helper.exs", __DIR__
 
 defmodule Mongo.Server.Test do
-  use ExUnit.Case, async: false
+  use ExUnit.Case, async: true
 
   test "ping" do
     assert :ok == Mongo.connect! |> Mongo.Server.ping
