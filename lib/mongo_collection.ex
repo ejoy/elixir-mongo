@@ -4,7 +4,8 @@ defmodule Mongo.Collection do
 
   Usage:
 
-      iex> Mongo.Helpers.test_collection("anycoll") |> Mongo.Collection.count
+      iex> _collection = Mongo.Helpers.test_collection("anycoll")
+      ...> Mongo.Helpers.test_collection("anycoll") |> Mongo.Collection.count
       {:ok, 6}
 
   `count()` or `count!()`
@@ -55,7 +56,7 @@ defmodule Mongo.Collection do
   @doc """
   Insert one document into the collection returns the document it received.
 
-      iex> collection = Mongo.connect! |> Mongo.db("test") |> Mongo.Db.collection("anycoll")
+      iex> collection = Mongo.Helpers.test_collection("anycoll")
       ...> %{a: 23} |> Mongo.Collection.insert_one(collection) |> elem(1)
       %{a: 23}
 
@@ -71,13 +72,13 @@ defmodule Mongo.Collection do
   @doc """
   Insert a list of documents into the collection
 
-      iex> collection = Mongo.connect! |> Mongo.db("test") |> Mongo.Db.collection("anycoll")
+      iex> collection = Mongo.Helpers.test_collection("anycoll")
       ...> [%{a: 23}, %{a: 24, b: 1}] |> Mongo.Collection.insert(collection) |> elem(1)
       [%{a: 23}, %{a: 24, b: 1}]
 
   You can chain it with `Mongo.assign_id/1` when you need ids for further processing. If you don't Mongodb will assign ids automatically.
 
-      iex> collection = Mongo.connect! |> Mongo.db("test") |> Mongo.Db.collection("anycoll")
+      iex> collection = Mongo.Helpers.test_collection("anycoll")
       ...> [%{a: 23}, %{a: 24, b: 1}] |> Mongo.assign_id |> Mongo.Collection.insert(collection) |> elem(1) |> Enum.at(0) |> Map.has_key?(:"_id")
       true
 
@@ -100,7 +101,8 @@ defmodule Mongo.Collection do
   @doc """
   Modifies an existing document or documents in the collection
 
-      iex> collection = Mongo.connect! |> Mongo.db("test") |> Mongo.Db.collection("anycoll")
+      iex> collection = Mongo.Helpers.test_collection("anycoll")
+      ...> _ = [%{a: 23}, %{a: 24, b: 1}] |> Mongo.assign_id |> Mongo.Collection.insert(collection) |> elem(1) |> Enum.at(0) |> Map.has_key?(:"_id")
       ...> collection |> Mongo.Collection.update(%{a: 456}, %{a: 123, b: 789})
       :ok
 
@@ -120,7 +122,8 @@ defmodule Mongo.Collection do
   @doc """
   Removes an existing document or documents in the collection (see db.collection.remove)
 
-      iex> collection = Mongo.connect! |> Mongo.db("test") |> Mongo.Db.collection("anycoll")
+      iex> collection = Mongo.Helpers.test_collection("anycoll")
+      ...> _ = [%{a: 23}, %{a: 24, b: 789}] |> Mongo.assign_id |> Mongo.Collection.insert(collection) |> elem(1) |> Enum.at(0) |> Map.has_key?(:"_id")
       ...> collection |> Mongo.Collection.delete(%{b: 789})
       :ok
 
@@ -165,7 +168,7 @@ defmodule Mongo.Collection do
   Finds the distinct values for a specified field across a single collection (see db.collection.distinct)
 
 
-      iex> collection = Mongo.connect! |> Mongo.db("test") |> Mongo.Db.collection("anycoll")
+      iex> collection = Mongo.Helpers.test_collection("anycoll")
       ...> collection |> Mongo.Collection.distinct!("value", %{value: %{"$lt": 3}})
       [0, 1]
 
@@ -185,13 +188,11 @@ defmodule Mongo.Collection do
 
   Returns  `:ok` or an array of documents (with option `:inline` active - set by default).
 
-      iex> collection = Mongo.connect! |> Mongo.db("test") |> Mongo.Db.collection("anycoll")
+      iex> collection = Mongo.Helpers.test_collection("anycoll")
       ...> Mongo.Collection.mr!(collection, "function(d){emit(this._id, this.value*2)}", "function(k, vs){return Array.sum(vs)}") |> is_list
       true
 
-      %{_id: Bson.ObjectId.from_string("542aa3fab9742bc0d5eaa12d"), value: 0.0}
-
-      iex> collection = Mongo.connect! |> Mongo.db("test") |> Mongo.Db.collection("anycoll")
+      iex> collection = Mongo.Helpers.test_collection("anycoll")
       ...> Mongo.Collection.mr!(collection, "function(d){emit('z', 3*this.value)}", "function(k, vs){return Array.sum(vs)}", "mrcoll")
       :ok
 
@@ -212,7 +213,7 @@ defmodule Mongo.Collection do
   @doc """
   Groups documents in the collection by the specified key
 
-      iex> collection = Mongo.connect! |> Mongo.db("test") |> Mongo.Db.collection("anycoll")
+      iex> collection = Mongo.Helpers.test_collection("anycoll")
       ...> collection |> Mongo.Collection.group!(%{a: true}) |> is_list
       true
 
