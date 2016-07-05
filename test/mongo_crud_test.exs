@@ -1,7 +1,7 @@
 Code.require_file "test_helper.exs", __DIR__
 
 defmodule Mongo.Crud.Test do
-  use ExUnit.Case, async: true
+  use ExUnit.Case, async: false
 
   # In order to run the tests a mongodb server must be listening locally on the default port
   setup do

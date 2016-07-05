@@ -1,5 +1,5 @@
 defmodule Mongo.Db.Collection.Test do
-  use ExUnit.Case, async: true
+  use ExUnit.Case, async: false
 
   test "drop database" do
     mongo = Mongo.connect!
