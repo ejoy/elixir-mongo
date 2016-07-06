@@ -32,7 +32,7 @@ defmodule Mongo.Response do
       queryFailure > 0 ->
         if numberReturned > 0 do
           case bson_decode_all(buffer) do
-            %Mongo.Error{} = error ->
+            %Mongo.Error{} = _error ->
               %Mongo.Error{msg: :"query failure"}
             docs ->
               %Mongo.Error{ msg: :"query failure", acc: docs}

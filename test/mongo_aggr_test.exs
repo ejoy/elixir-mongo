@@ -1,6 +1,7 @@
 Code.require_file "test_helper.exs", __DIR__
 
 defmodule Mongo.Aggr.Test do
+  require Logger
   use ExUnit.Case, async: false
 
   # In order to run the tests a mongodb server must be listening locally on the default port
@@ -36,7 +37,7 @@ defmodule Mongo.Aggr.Test do
     if true do
       anycoll = ctx[:anycoll]
       assert Mongo.Collection.mr!(anycoll, "function(d){emit(this._id, this.value*2)}", "function(k, vs){return Array.sum(vs)}") |> is_list
-      assert :ok == Mongo.Collection.mr!(anycoll, "function(d){emit('z', 3*this.value)}", "function(k, vs){return Array.sum(vs)}", "anycoll2")
+      assert :ok == Mongo.Collection.mr!(anycoll, "function(d){emit('z', 3*this.value)}", "function(k, vs){return Array.sum(vs)}", "somecol")
     end
   end
 

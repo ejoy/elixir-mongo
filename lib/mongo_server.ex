@@ -295,7 +295,7 @@ defmodule Mongo.Server do
   end
   # generates a request Id when not provided (makes sure it is a positive integer)
   defp gen_reqid() do
-    <<tail::24, _::1, head::7>> = :crypto.rand_bytes(4)
+    <<tail::24, _::1, head::7>> = :crypto.strong_rand_bytes(4)
     <<tail::24, 0::1, head::7>>
   end
 

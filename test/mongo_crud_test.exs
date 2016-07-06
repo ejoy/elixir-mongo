@@ -21,6 +21,7 @@ defmodule Mongo.Crud.Test do
 
   test "find", ctx do
     if true do
+      require Logger
       anycoll = ctx[:anycoll]
       # count without retreiving
       assert anycoll |> Mongo.Collection.find |> Enum.count == 6

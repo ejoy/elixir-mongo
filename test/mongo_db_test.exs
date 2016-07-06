@@ -4,7 +4,7 @@ defmodule Mongo.Db.Test do
   test "drop database" do
     mongo = Mongo.connect!
     db = Mongo.db(mongo, "test_drop")
-    anycoll = Mongo.Db.collection(db, "coll_crud")
+    anycoll = Mongo.Db.collection(db, "coll_db")
     Mongo.Collection.drop anycoll
     [
         %{a: 0, value: 0},
