@@ -53,6 +53,10 @@ defmodule Mongo.Response do
         end
     end
   end
+  
+  def new(%Mongo.Error{msg: msg}) do
+    %Mongo.Error{msg: msg}
+  end
 
   @doc """
   Decodes a command response
