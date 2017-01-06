@@ -60,7 +60,7 @@ defmodule Mongo.Server do
       port: Map.get(opts, :port,    @port),
       mode: Map.get(opts, :mode,    @mode),
       timeout: Map.get(opts, :timeout,    @timeout),
-      id_prefix: mongo_prefix}
+      id_prefix: mongo_prefix()}
   end
 
   @doc false
@@ -90,7 +90,7 @@ defmodule Mongo.Server do
   @doc """
   Sends a message to MongoDB
   """
-  def send(mongo, payload, reqid \\ gen_reqid)
+  def send(mongo, payload, reqid \\ gen_reqid())
   def send(%Mongo.Server{socket: socket, mode: :passive}, payload, reqid) do
      do_send(socket, payload, reqid)
   end
@@ -258,12 +258,12 @@ defmodule Mongo.Server do
       true
 
   """
-  def assign_id(docs, client_prefix \\ gen_client_prefix)
+  def assign_id(docs, client_prefix \\ gen_client_prefix())
   def assign_id(docs, client_prefix) do
     client_prefix = check_client_prefix(client_prefix)
     Enum.map_reduce(
       docs,
-      {client_prefix, gen_trans_prefix, :crypto.rand_uniform(0, 4294967295)},
+      {client_prefix, gen_trans_prefix(), :crypto.rand_uniform(0, 4294967295)},
       fn(doc, id) -> { Map.put(doc, :'_id', %Bson.ObjectId{oid: to_oid(id)}), next_id(id) } end)
       |> elem(0)
   end
@@ -271,7 +271,7 @@ defmodule Mongo.Server do
   # returns a 2 bites prefix integer
   defp check_client_prefix(%Mongo.Server{id_prefix: prefix}) when is_integer(prefix), do: prefix
   defp check_client_prefix(prefix) when is_integer(prefix), do: prefix
-  defp check_client_prefix(_), do: gen_client_prefix
+  defp check_client_prefix(_), do: gen_client_prefix()
   # generates a 2 bites prefix integer
   defp gen_client_prefix, do: :crypto.rand_uniform(0, 65535)
   # returns a 6 bites prefix integer
