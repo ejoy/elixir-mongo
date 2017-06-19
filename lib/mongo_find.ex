@@ -103,7 +103,11 @@ defmodule Mongo.Find do
               {:done, {:cont, acc}} -> {:done, acc}
               other -> other
           end
-        error -> error
+        error ->
+          case error do
+            {:error, msg} -> raise Mongo.Bang, msg: msg, acc: acc
+            %Mongo.Error{msg: msg, acc: acc} -> raise Mongo.Bang, msg: msg, acc: acc
+          end
       end
     end
 
