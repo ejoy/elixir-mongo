@@ -54,7 +54,7 @@ defmodule Mongo.Server do
     host = Map.get(opts, :host,    @host)
     tcp_connect %Mongo.Server{
       host: case host do
-              host when is_binary(host) -> String.to_char_list(host)
+              host when is_binary(host) -> String.to_charlist(host)
               host -> host
             end,
       port: Map.get(opts, :port,    @port),
@@ -102,7 +102,7 @@ defmodule Mongo.Server do
   defp do_send(socket, payload, reqid) do
     case :gen_tcp.send(socket, payload |> message(reqid)) do
       :ok -> {:ok, reqid}
-      error -> error
+      error -> raise Mongo.Bang, msg: :network_error, acc: error
     end
   end
 
@@ -202,7 +202,7 @@ defmodule Mongo.Server do
       {:ok, hostname} ->
         <<prefix::16, _::binary>> = :crypto.hash(:md5, (hostname ++ :os.getpid) |> to_string)
         prefix
-      _ -> :crypto.rand_uniform(0, 65535)
+      _ -> :rand.uniform(65535)
     end
   end
   @doc false
@@ -263,7 +263,7 @@ defmodule Mongo.Server do
     client_prefix = check_client_prefix(client_prefix)
     Enum.map_reduce(
       docs,
-      {client_prefix, gen_trans_prefix(), :crypto.rand_uniform(0, 4294967295)},
+      {client_prefix, gen_trans_prefix(), :rand.uniform(4294967295)},
       fn(doc, id) -> { Map.put(doc, :'_id', %Bson.ObjectId{oid: to_oid(id)}), next_id(id) } end)
       |> elem(0)
   end
@@ -273,7 +273,7 @@ defmodule Mongo.Server do
   defp check_client_prefix(prefix) when is_integer(prefix), do: prefix
   defp check_client_prefix(_), do: gen_client_prefix()
   # generates a 2 bites prefix integer
-  defp gen_client_prefix, do: :crypto.rand_uniform(0, 65535)
+  defp gen_client_prefix, do: :rand.uniform(65535)
   # returns a 6 bites prefix integer
   defp gen_trans_prefix do
     {gs, s, ms} = :erlang.timestamp()
@@ -298,5 +298,4 @@ defmodule Mongo.Server do
     <<tail::24, _::1, head::7>> = :crypto.strong_rand_bytes(4)
     <<tail::24, 0::1, head::7>>
   end
-
 end
