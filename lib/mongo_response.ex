@@ -141,7 +141,8 @@ defmodule Mongo.Response do
   """
   def aggregate(response) do
     case cmd(response) do
-      {:ok, doc} -> doc[:result]
+      {:ok, doc} ->
+        doc.cursor.firstBatch #TODO: 这个库.. 包括 getIndexes, 就是这么粗糙的只拿第一批, 等我们壮大到 batch 不够用, 再加上...
       error -> error
     end
   end

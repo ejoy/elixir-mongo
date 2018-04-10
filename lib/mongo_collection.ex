@@ -265,7 +265,7 @@ defmodule Mongo.Collection do
   def aggregate(collection, pipeline, options \\ %{}) do
     cmd_args = Map.merge(%{pipeline: pipeline}, options)
     case Mongo.Db.cmd_sync(collection.db, %{aggregate: collection.name}, cmd_args) do
-      {:ok, resp} -> Mongo.Response.aggregate resp
+      {:ok, resp} -> Mongo.Response.aggregate(resp)
       error -> error
     end
   end
