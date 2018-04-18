@@ -1,7 +1,8 @@
 defmodule Mongo.Db do
   @moduledoc """
- Module holding operations that can be performed on MongoDB databases
+    Module holding operations that can be performed on MongoDB databases
   """
+
   defstruct [
     name: nil,
     mongo: nil,
@@ -16,40 +17,6 @@ defmodule Mongo.Db do
   Creates `%Mongo.Db{}` with default options
   """
   def new(mongo, name), do: %Mongo.Db{mongo: mongo, name: name, opts: Server.db_opts(mongo)}
-
-  @doc """
-  Authenticates a user to a database
-
-  Expects a DB struct, a user and a password returns `{:ok, db}` or `%Mongo.Error{}`
-  """
-  def auth(db, username, password) do
-    %Mongo.Db{db| auth: {username, hash(username <> ":mongo:" <> password)}} |> auth
-  end
-  defbang auth(username, password, db)
-
-  @doc """
-  Check authentication
-
-  returns true if authentication was performed and succesful
-  """
-  def auth?(db)
-  def auth?(%Mongo.Db{auth: nil}), do: false
-  def auth?(_), do: true
-
-  @doc false
-  # Authenticates a user to a database (or do it again after failure)
-  def auth(%Mongo.Db{auth: nil}=db), do: {:ok, db}
-  def auth(%Mongo.Db{auth: {username, hash_password}}=db) do
-    nonce = getnonce(db)
-    case cmd_sync(db, %{authenticate: 1}, %{nonce: nonce, user: username, key: hash(nonce <> username <> hash_password)}) do
-      {:ok, resp} ->
-        case Mongo.Response.success(resp) do
-          :ok -> {:ok, db}
-          error -> error
-        end
-      error -> error
-    end
-  end
 
   @doc """
   Returns a collection struct
@@ -76,26 +43,6 @@ defmodule Mongo.Db do
     Server.send(db.mongo, Mongo.Request.cmd(db.name, cmd, cmd_args))
   end
   defbang cmd(db, command)
-
-  # creates a md5 hash in hex with loawercase
-  defp hash(data) do
-    :crypto.hash(:md5, data) |> binary_to_hex
-  end
-
-  # creates an hex string from binary
-  defp binary_to_hex(bin) do
-    for << <<b::4>> <- bin >>, into: <<>> do
-        <<Integer.to_string(b,16)::binary>>
-    end |> String.downcase
-  end
-
-  # get `nonce` token from server
-  defp getnonce(db) do
-    case cmd_sync(db, %{getnonce: true}) do
-      {:ok, resp} -> resp |> Mongo.Response.getnonce
-      error -> error
-    end
-  end
 
   @doc """
   Returns the error status of the preceding operation.

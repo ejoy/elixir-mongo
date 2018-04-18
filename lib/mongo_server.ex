@@ -8,6 +8,7 @@ defmodule Mongo.Server do
     port: nil,
     mode: false,
     timeout: nil,
+    wire_version: nil,
     opts: %{},
     id_prefix: nil,
     socket: nil ]
@@ -50,9 +51,8 @@ defmodule Mongo.Server do
   Opts must be a Map
   """
   def connect(opts) when is_map(opts) do
-    opts = default_env(opts)
-    host = Map.get(opts, :host,    @host)
-    tcp_connect %Mongo.Server{
+    host = Map.get(opts, :host, @host)
+    mongo_server = %Mongo.Server{
       host: case host do
               host when is_binary(host) -> String.to_charlist(host)
               host -> host
@@ -61,6 +61,13 @@ defmodule Mongo.Server do
       mode: Map.get(opts, :mode,    @mode),
       timeout: Map.get(opts, :timeout,    @timeout),
       id_prefix: mongo_prefix()}
+
+    with {:ok, s} <- tcp_connect(mongo_server),
+         {:ok, s} <- wire_version(s) do
+           maybe_auth(opts, s)
+    else
+      error -> error
+    end
   end
 
   @doc false
@@ -72,6 +79,30 @@ defmodule Mongo.Server do
     end
   end
 
+  @doc false
+  defp wire_version(mongo) do
+    cmd = %{ismaster: 1}
+    case cmd_sync(mongo, cmd) do
+      {:ok, resp} -> 
+        case Mongo.Response.cmd(resp) do
+          {:ok, %{maxWireVersion: version}} -> {:ok, %{mongo | wire_version: version}}
+          {:ok, %{ok: ok}} when ok == 1 -> {:ok, %{mongo | wire_version: 0}}
+          error -> error
+        end
+      error -> error
+    end
+  end
+
+  @doc false
+  defp maybe_auth(opts, mongo) do
+    if opts[:username] != nil and opts[:password] != nil do
+      Mongo.Auth.auth(opts, mongo)
+    else
+      {:ok, mongo}
+    end
+  end
+
+  @doc false
   defp tcp_recv(mongo) do
     :gen_tcp.recv(mongo.socket, 0, mongo.timeout)
   end
@@ -161,14 +192,6 @@ defmodule Mongo.Server do
   """
   def close(mongo) do
     :gen_tcp.close(mongo.socket)
-  end
-
-  defp default_env(opts) do
-    case :application.get_env(:mongo, :host) do
-        {:ok, {host, port}} ->
-          opts |> Map.put_new(:host, host) |> Map.put_new(:port, port)
-        _ -> opts
-    end
   end
 
   # makes sure response is complete
