@@ -261,10 +261,10 @@ defmodule Mongo.Server do
   Assigns radom ids to a list of documents when `:_id` is missing
 
       iex> [%{a: 1}] |> Mongo.Server.assign_id |> Enum.at(0) |> Map.keys
-      [:"_id", :a]
+      [:_id, :a]
 
       #a prefix to ids can be set manually like this
-      iex> prefix = case [%{a: 1}] |> Mongo.Server.assign_id(256*256-1) |> Enum.at(0) |> Map.get(:"_id") do
+      iex> prefix = case [%{a: 1}] |> Mongo.Server.assign_id(256*256-1) |> Enum.at(0) |> Map.get(:_id) do
       ...>   %Bson.ObjectId{oid: <<prefix::16, _::binary>>} -> prefix
       ...>   error -> error
       ...> end
@@ -273,7 +273,7 @@ defmodule Mongo.Server do
 
       #by default prefix are set at connection time and remains identical for the entire connection
       iex> mongo = Mongo.connect!
-      ...> prefix = case [%{a: 1}] |> Mongo.Server.assign_id(mongo) |> Enum.at(0) |> Map.get(:"_id") do
+      ...> prefix = case [%{a: 1}] |> Mongo.Server.assign_id(mongo) |> Enum.at(0) |> Map.get(:_id) do
       ...>   %Bson.ObjectId{oid: <<prefix::16, _::binary>>} -> prefix
       ...>   error -> error
       ...> end
@@ -287,7 +287,7 @@ defmodule Mongo.Server do
     Enum.map_reduce(
       docs,
       {client_prefix, gen_trans_prefix(), :rand.uniform(4294967295)},
-      fn(doc, id) -> { Map.put(doc, :'_id', %Bson.ObjectId{oid: to_oid(id)}), next_id(id) } end)
+      fn(doc, id) -> { Map.put(doc, :_id, %Bson.ObjectId{oid: to_oid(id)}), next_id(id) } end)
       |> elem(0)
   end
 

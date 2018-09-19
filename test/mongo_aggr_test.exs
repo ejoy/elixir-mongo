@@ -52,8 +52,8 @@ defmodule Mongo.Aggr.Test do
       assert [%{value: 1}|_] = ctx[:anycoll] |> Mongo.Collection.aggregate([
         %{'$skip': 1},
         %{'$limit': 5},
-        %{'$project': %{'_id': false, value: true}}
-      ])
+        %{'$project': %{_id: false, value: true}}
+      ], %{cursor: %{}})
     end
   end
 

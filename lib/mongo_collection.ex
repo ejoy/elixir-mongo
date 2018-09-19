@@ -79,7 +79,7 @@ defmodule Mongo.Collection do
   You can chain it with `Mongo.assign_id/1` when you need ids for further processing. If you don't Mongodb will assign ids automatically.
 
       iex> collection = Mongo.Helpers.test_collection("anycoll")
-      ...> [%{a: 23}, %{a: 24, b: 1}] |> Mongo.assign_id |> Mongo.Collection.insert(collection) |> elem(1) |> Enum.at(0) |> Map.has_key?(:"_id")
+      ...> [%{a: 23}, %{a: 24, b: 1}] |> Mongo.assign_id |> Mongo.Collection.insert(collection) |> elem(1) |> Enum.at(0) |> Map.has_key?(:_id)
       true
 
   `Mongo.Collection.insert` returns the list of documents it received.
@@ -102,7 +102,7 @@ defmodule Mongo.Collection do
   Modifies an existing document or documents in the collection
 
       iex> collection = Mongo.Helpers.test_collection("anycoll")
-      ...> _ = [%{a: 23}, %{a: 24, b: 1}] |> Mongo.assign_id |> Mongo.Collection.insert(collection) |> elem(1) |> Enum.at(0) |> Map.has_key?(:"_id")
+      ...> _ = [%{a: 23}, %{a: 24, b: 1}] |> Mongo.assign_id |> Mongo.Collection.insert(collection) |> elem(1) |> Enum.at(0) |> Map.has_key?(:_id)
       ...> collection |> Mongo.Collection.update(%{a: 456}, %{a: 123, b: 789})
       :ok
 
@@ -123,7 +123,7 @@ defmodule Mongo.Collection do
   Removes an existing document or documents in the collection (see db.collection.remove)
 
       iex> collection = Mongo.Helpers.test_collection("anycoll")
-      ...> _ = [%{a: 23}, %{a: 24, b: 789}] |> Mongo.assign_id |> Mongo.Collection.insert(collection) |> elem(1) |> Enum.at(0) |> Map.has_key?(:"_id")
+      ...> _ = [%{a: 23}, %{a: 24, b: 789}] |> Mongo.assign_id |> Mongo.Collection.insert(collection) |> elem(1) |> Enum.at(0) |> Map.has_key?(:_id)
       ...> collection |> Mongo.Collection.delete(%{b: 789})
       :ok
 
@@ -258,7 +258,7 @@ defmodule Mongo.Collection do
       ...> collection |> Mongo.Collection.aggregate([
       ...>    %{'$skip': 1},
       ...>    %{'$limit': 5},
-      ...>    %{'$project': %{'_id': false, value: true}} ])
+      ...>    %{'$project': %{_id: false, value: true}} ], %{cursor: %{}})
       [%{value: 1}, %{value: 1}, %{value: 1}, %{value: 1}, %{value: 3}]
 
   """
@@ -312,8 +312,8 @@ defmodule Mongo.Collection do
 
   def createIndexes(collection, indexes) do
     req = %{
-      "createIndexes": collection.name,
-      "indexes": indexes,
+      createIndexes: collection.name,
+      indexes: indexes,
     }
     case Mongo.Db.cmd_sync(collection.db, req) do
       {:ok, %{docs: [resp]}} -> resp
@@ -325,7 +325,7 @@ defmodule Mongo.Collection do
   Gets a list of All Indexes, only work at 3.0
   """
   def getIndexes(collection) do
-    case Mongo.Db.cmd_sync(collection.db, %{"listIndexes": collection.name}) do
+    case Mongo.Db.cmd_sync(collection.db, %{listIndexes: collection.name}) do
       {:ok, %{docs: [%{ok: 1.0} = resp]}} -> resp.cursor.firstBatch
       {:ok, %{docs: [error]}} -> error
       error -> error
