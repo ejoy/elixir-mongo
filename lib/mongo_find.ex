@@ -125,5 +125,9 @@ defmodule Mongo.Find do
     Not implemented
     """
     def member?(_, _), do: :not_implemented
+
+    @doc false
+    #Not implemented
+    def slice(_), do: {:error, __MODULE__}
   end
 end

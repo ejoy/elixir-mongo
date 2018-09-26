@@ -74,6 +74,11 @@ defmodule Mongo.Cursor do
     @doc false
     #Not implemented
     def member?(_, _cursor), do: {:ok, false}
+
+    @doc false
+    #Not implemented
+    #https://hexdocs.pm/elixir/Enumerable.html#slice/1
+    def slice(_), do: {:error, __MODULE__}
   end
 
 end

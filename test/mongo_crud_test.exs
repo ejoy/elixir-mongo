@@ -49,7 +49,7 @@ defmodule Mongo.Crud.Test do
       assert [%{a: 23}, %{a: 24, b: 1}] |> Mongo.Collection.insert!(anycoll) |> is_list
     end
     if true do
-      assert %{'_id': 2, a: 456} |> Mongo.Collection.insert_one!(anycoll) |> is_map
+      assert %{_id: 2, a: 456} |> Mongo.Collection.insert_one!(anycoll) |> is_map
       assert {:ok, _} = ctx[:db] |> Mongo.Db.getLastError 
     end
   end
