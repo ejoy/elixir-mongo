@@ -17,8 +17,8 @@ defmodule Mongo.Cursor do
   def next_batch(cursor) do
     mongo = cursor.collection.db.mongo
     case Mongo.Server.send(mongo, Mongo.Request.get_more(cursor.collection, cursor.batchSize, cursor.response.cursorID)) do
-        {:ok, _reqid} ->
-          case Mongo.Server.response(mongo) do
+        {:ok, reqid} ->
+          case Mongo.Server.response(mongo, reqid) do
             {:ok, response} -> %Mongo.Cursor{cursor| response: response, exhausted: response.cursorID == 0}
             error -> error
           end
@@ -29,8 +29,8 @@ defmodule Mongo.Cursor do
   def exec(collection, query, batchSize \\ 0) do
     mongo = collection.db.mongo
     case Mongo.Server.send(mongo, query) do
-      {:ok, _reqid} ->
-        case Mongo.Server.response(mongo) do
+      {:ok, reqid} ->
+        case Mongo.Server.response(mongo, reqid) do
           {:ok, initialResponse} ->
             %Mongo.Cursor{ collection: collection,
                            response:   initialResponse,
