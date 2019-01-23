@@ -83,7 +83,7 @@ defmodule Mongo.Server do
   defp wire_version(mongo) do
     cmd = %{ismaster: 1}
     case cmd_sync(mongo, cmd) do
-      {:ok, resp} -> 
+      {:ok, resp} ->
         case Mongo.Response.cmd(resp) do
           {:ok, %{maxWireVersion: version}} -> {:ok, %{mongo | wire_version: version}}
           {:ok, %{ok: ok}} when ok == 1 -> {:ok, %{mongo | wire_version: 0}}
@@ -110,10 +110,14 @@ defmodule Mongo.Server do
   @doc """
   Retreives a repsonce from the MongoDB server (only for passive mode)
   """
-  def response(mongo) do
+  def response(mongo, req_id) do
     case tcp_recv(mongo) do
       {:ok, <<messageLength::32-signed-little, _::binary>> = message} ->
-        complete(mongo, messageLength, message) |> Mongo.Response.new
+        case complete(mongo, messageLength, message) |> Mongo.Response.new do
+          {:ok, %Mongo.Response{requestID: res_id}} when res_id != req_id ->
+            response(mongo, req_id)
+          res -> res
+        end
       {:error, msg} -> %Mongo.Error{msg: msg}
     end
   end
@@ -148,7 +152,7 @@ defmodule Mongo.Server do
   """
   def cmd_sync(mongo, command) do
     case cmd(mongo, command) do
-      {:ok, _reqid} -> response(mongo)
+      {:ok, reqid} -> response(mongo, reqid)
       error -> error
     end
   end

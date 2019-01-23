@@ -28,7 +28,7 @@ defmodule Mongo.Db do
   """
   def cmd_sync(db, command, cmd_args \\ %{}) do
     case cmd(db, command, cmd_args) do
-      {:ok, _reqid} -> Server.response(db.mongo)
+      {:ok, reqid} -> Server.response(db.mongo, reqid)
       error -> error
     end
   end
