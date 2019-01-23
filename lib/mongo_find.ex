@@ -65,7 +65,7 @@ defmodule Mongo.Find do
   def hint(f, indexName) when is_atom(indexName), do: f |> addSpecial(:'$hint', indexName)
   def hint(f, hints) when is_map(hints), do: f |> addSpecial(:'$hint', hints)
 
-  def sort(f, opts) when is_map(opts), do: f |> addSpecial(:"$orderby", opts)
+  def sort(f, opts) when is_map(opts) or is_list(opts), do: f |> addSpecial(:"$orderby", opts)
   @doc """
   Sets query options
 
