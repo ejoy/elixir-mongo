@@ -19,6 +19,7 @@ defmodule Mongo.Server do
   @timeout 6000
 
   use Mongo.Helpers
+  require Logger
 
   @doc """
   connects to local mongodb server by defaults to {"127.0.0.1", 27017}
@@ -114,7 +115,8 @@ defmodule Mongo.Server do
     case tcp_recv(mongo) do
       {:ok, <<messageLength::32-signed-little, _::binary>> = message} ->
         case complete(mongo, messageLength, message) |> Mongo.Response.new do
-          {:ok, %Mongo.Response{requestID: res_id}} when res_id != req_id ->
+          {:ok, response = %Mongo.Response{requestID: res_id}} when res_id != req_id ->
+            Logger.info("#{__MODULE__} receive unknown package from mongo: #{inspect response}")
             response(mongo, req_id)
           res -> res
         end
