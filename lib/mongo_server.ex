@@ -63,10 +63,16 @@ defmodule Mongo.Server do
       timeout: Map.get(opts, :timeout,    @timeout),
       id_prefix: mongo_prefix()}
 
-    with {:ok, s} <- tcp_connect(mongo_server),
-         {:ok, s} <- wire_version(s) do
-           maybe_auth(opts, s)
-    else
+    case tcp_connect(mongo_server) do
+      {:ok, s} ->
+        with {:ok, s1} <- wire_version(s),
+             {:ok, s2} <- maybe_auth(opts, s1) do
+          {:ok, s2}
+        else
+          error ->
+            close(s)
+            error
+        end
       error -> error
     end
   end
@@ -154,7 +160,8 @@ defmodule Mongo.Server do
   """
   def cmd_sync(mongo, command) do
     case cmd(mongo, command) do
-      {:ok, reqid} -> response(mongo, reqid)
+      {:ok, reqid} ->
+        response(mongo, reqid)
       error -> error
     end
   end
