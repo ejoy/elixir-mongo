@@ -26,7 +26,7 @@ defmodule Mongo.Mixfile do
     [
       {:ex_doc, ">= 0.0.0", only: :doc },
       {:earmark, ">= 0.0.0", only: :doc},
-      {:cbson, github: "sean-lin/elixir-cbson"},
+      {:cbson, "~> 0.1.1"}
     ]
   end
 
