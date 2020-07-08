@@ -110,6 +110,15 @@ defmodule Mongo.Server do
   end
 
   @doc false
+  defp tcp_recv(%Mongo.Server{mode: :active} = mongo) do
+    receive do
+      {:tcp, _, m} ->
+        {:ok, m}
+    after
+      mongo.timeout ->
+        {:error, :etimedout}
+    end
+  end
   defp tcp_recv(mongo) do
     :gen_tcp.recv(mongo.socket, 0, mongo.timeout)
   end

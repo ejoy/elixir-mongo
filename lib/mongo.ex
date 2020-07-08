@@ -43,12 +43,17 @@ defmodule Mongo do
   """
   defdelegate assign_id(docs, mongo), to: Mongo.Server
 
-  defmodule Error, do: defstruct([msg: nil, acc: []])
+  defmodule Error, do: defstruct([msg: nil, acc: [], query: nil])
 
   defmodule Bang do
-    defexception [:message, :stack, :raw]
+    defexception [:message, :stack, :raw, :query]
     def exception(message) when is_bitstring(message), do: %Bang{message: message}
-    def exception(msg: msg, acc: acc), do: %Bang{message: inspect(msg), stack: acc, raw: msg}
+    def exception(kw_list) do
+      msg = Keyword.get(kw_list, :msg)
+      acc = Keyword.get(kw_list, :acc)
+      query = Keyword.get(kw_list, :query)
+      %Bang{message: inspect(msg), stack: acc, raw: msg, query: query}
+    end
   end
 
 end

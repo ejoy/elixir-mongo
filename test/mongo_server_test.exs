@@ -14,7 +14,7 @@ defmodule Mongo.Server.Test do
   end
 
   test "active mode" do
-    mongo = Mongo.connect! %{mode: :active}
+    {:ok, mongo} = Mongo.Server.connect %{mode: :active}
     ping_cmd = Mongo.Request.cmd("admin", %{ping: true})
     Mongo.Server.send(mongo, ping_cmd)
     receive do

@@ -32,8 +32,8 @@ defmodule Mongo.Cursor.Test do
   end
 
   test "find hint", ctx do
-    ctx[:anycoll] |> Mongo.Collection.createIndex("tst_value", %{value: true})
-    explain = ctx[:anycoll] |> Mongo.Collection.find |> Mongo.Find.hint(%{value: true}) |> Mongo.Find.explain 
+    ctx[:anycoll] |> Mongo.Collection.createIndex("tst_value", %{value: 1})
+    explain = ctx[:anycoll] |> Mongo.Collection.find |> Mongo.Find.hint(%{value: 1}) |> Mongo.Find.explain
     assert "tst_value" == explain["queryPlanner"]["winningPlan"]["inputStage"][:indexName]
   end
 

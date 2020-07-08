@@ -105,8 +105,8 @@ defmodule Mongo.Find do
           end
         error ->
           case error do
-            {:error, msg} -> raise Mongo.Bang, msg: msg, acc: acc
-            %Mongo.Error{msg: msg, acc: acc} -> raise Mongo.Bang, msg: msg, acc: acc
+            {:error, msg} -> raise Mongo.Bang, msg: msg, acc: acc, query: find
+            %Mongo.Error{msg: msg, acc: acc} -> raise Mongo.Bang, msg: msg, acc: acc, query: find
           end
       end
     end

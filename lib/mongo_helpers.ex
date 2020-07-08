@@ -37,6 +37,7 @@ defmodule Mongo.Helpers do
     mongo = Mongo.connect!
     db = Mongo.db(mongo, "test")
     collection = Mongo.Db.collection(db, collname)
+    Mongo.Collection.delete collection, %{}
     Mongo.Collection.drop collection
     [
         %{a: 0, value: 0},
@@ -45,6 +46,7 @@ defmodule Mongo.Helpers do
         %{a: 3, value: 1},
         %{a: 4, value: 1},
         %{a: 5, value: 3} ] |> Mongo.Collection.insert(collection)
+    Process.sleep(100)
     collection
   end
 end
