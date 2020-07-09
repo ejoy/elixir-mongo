@@ -26,7 +26,7 @@ defmodule Mongo.Mixfile do
     [
       {:ex_doc, ">= 0.0.0", only: :doc },
       {:earmark, ">= 0.0.0", only: :doc},
-      {:cbson, "~> 0.1.1"}
+      {:cbson, "~> 0.1.4"}
     ]
   end
 
